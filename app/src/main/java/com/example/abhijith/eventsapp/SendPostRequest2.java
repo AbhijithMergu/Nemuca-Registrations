@@ -1,10 +1,14 @@
 package com.example.abhijith.eventsapp;
 
+/**
+ * Created by pavan on 3/8/2018.
+ */
+
+
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -16,29 +20,28 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class SendPostRequest extends AsyncTask<JSONObject, Void, String> {
-    public AsyncResponse delegate = null;
+public class SendPostRequest2 extends AsyncTask<String, Void, String> {
+
     protected void onPreExecute(){}
 
-    public String doInBackground(JSONObject... arg0) {
+    public String doInBackground(String... arg0) {
 
         try {
 
             URL url = new URL("https://jsonplaceholder.typicode.com/posts/1"); // here is your URL path
 
-            JSONObject postDataParams = arg0[0];
+            JSONObject postDataParams = new JSONObject();
 
-//            postDataParams.put("ideaid", 20);
-//            postDataParams.put("subject", "From Android");
-//            postDataParams.put("body","Check object sent");
-//            postDataParams.put("date_time", DateFormat.getDateInstance().toString());
-//
-//            Log.e("params",postDataParams.toString());
+            postDataParams.put("ideaid", 20);
+            postDataParams.put("subject", "From Android");
+            postDataParams.put("body","Check object sent");
+            postDataParams.put("date_time", DateFormat.getDateInstance().toString());
+
+            Log.e("params",postDataParams.toString());
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(15000 /* milliseconds */);
@@ -91,16 +94,6 @@ public class SendPostRequest extends AsyncTask<JSONObject, Void, String> {
     protected void onPostExecute(String result) {
         //Toast.makeText(getApplicationContext(), result,
         //    Toast.LENGTH_LONG).show();
-        JSONObject obj;
-        try {
-            obj = new JSONObject(result);
-        }
-        catch (final JSONException e)
-        {
-            obj = null;
-        }
-
-        delegate.processFinish(obj);
     }
 
 

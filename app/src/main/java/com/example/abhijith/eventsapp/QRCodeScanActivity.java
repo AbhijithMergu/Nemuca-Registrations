@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.google.zxing.Result;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -29,7 +30,7 @@ import java.util.Iterator;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 import static android.Manifest.permission.CAMERA;
 
-public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler {
+public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler{
     private ZXingScannerView mScannerView;
     private static final int REQUEST_CAMERA = 1;
 
@@ -151,11 +152,25 @@ public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScann
         alert1.show();*/
         Intent i = new Intent(QRCodeScanActivity.this, RegistrationActivity.class);
 
+
+        JSONObject obj = new JSONObject();
+        try{
+            obj.put("qId",result);
+
+        }catch(JSONException e){
+
+        }
+
+
         SendPostRequest post = new SendPostRequest();
         String result2 = post.doInBackground();
+
         i.putExtra("Result", result2);
+        i.putExtra("PAID","AWD,AER,ALP");
+        i.putExtra("REGISTERED","DXT,KOT,TTX");
         startActivity(i);
 
     }
+
 
 }
