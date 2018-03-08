@@ -1,5 +1,7 @@
 package com.example.abhijith.eventsapp;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,15 +25,30 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class SendPostRequest extends AsyncTask<JSONObject, Void, String> {
     public AsyncResponse delegate = null;
-    protected void onPreExecute(){}
+    private Activity activity;
+    private ProgressDialog pDialog;
+    public SendPostRequest(){
+
+    }
+    public SendPostRequest(Activity activity){
+        this.activity = activity;
+       // pDialog = new ProgressDialog(activity);
+    }
+    protected void onPreExecute(){
+        pDialog = new ProgressDialog(activity);
+        pDialog.setMessage("Please wait...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+    }
 
     public String doInBackground(JSONObject... arg0) {
 
         try {
 
-            URL url = new URL("https://jsonplaceholder.typicode.com/posts/1"); // here is your URL path
 
-            JSONObject postDataParams = arg0[0];
+            URL url = new URL(arg0[0].getString("url"));
+            JSONObject postDataParams = arg0[1];
+//            URL url = new URL("http://www.acumenit.in/andy/register/fetch"); // here is your URL path
 
 //            postDataParams.put("ideaid", 20);
 //            postDataParams.put("subject", "From Android");
@@ -50,6 +67,7 @@ public class SendPostRequest extends AsyncTask<JSONObject, Void, String> {
             OutputStream os = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(os, "UTF-8"));
+            Log.e("Sent data : ",getPostDataString(postDataParams));
             writer.write(getPostDataString(postDataParams));
 
             writer.flush();
@@ -91,16 +109,19 @@ public class SendPostRequest extends AsyncTask<JSONObject, Void, String> {
     protected void onPostExecute(String result) {
         //Toast.makeText(getApplicationContext(), result,
         //    Toast.LENGTH_LONG).show();
-        JSONObject obj;
-        try {
-            obj = new JSONObject(result);
-        }
-        catch (final JSONException e)
-        {
-            obj = null;
-        }
+//        JSONObject obj;
+//        try {
+//            obj = new JSONObject(result);
+//        }
+//        catch (final JSONException e)
+//        {
+//            obj = null;
+//        }
 
-        delegate.processFinish(obj);
+        if (pDialog.isShowing())
+            pDialog.dismiss();
+        Log.e("result : ",result);
+        delegate.processFinish(result);
     }
 
 

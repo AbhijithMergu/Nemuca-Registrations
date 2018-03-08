@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.google.zxing.Result;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,10 +31,10 @@ import java.util.Iterator;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 import static android.Manifest.permission.CAMERA;
 
-public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler{
+public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler,AsyncResponse{
     private ZXingScannerView mScannerView;
     private static final int REQUEST_CAMERA = 1;
-
+    SendPostRequest asyncTask =new SendPostRequest(QRCodeScanActivity.this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,7 @@ public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScann
                 requestPermission();
             }
         }
+        asyncTask.delegate = this;
     }
 
     private boolean checkPermission() {
@@ -150,27 +152,48 @@ public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScann
         builder.setMessage(rawResult.getText());
         AlertDialog alert1 = builder.create();
         alert1.show();*/
-        Intent i = new Intent(QRCodeScanActivity.this, RegistrationActivity.class);
+//        Intent i = new Intent(QRCodeScanActivity.this, RegistrationActivity.class);
 
 
-        JSONObject obj = new JSONObject();
-        try{
-            obj.put("qId",result);
+        JSONObject url = new JSONObject();
+        JSONObject values = new JSONObject();
 
-        }catch(JSONException e){
+        try {
+            url.put("url","http://www.acumenit.in/andy/register/fetch");
+            values.put("qId", result);
+        }catch (JSONException e)
+        {
 
         }
 
 
-        SendPostRequest post = new SendPostRequest();
-        String result2 = post.doInBackground();
-
-        i.putExtra("Result", result2);
-        i.putExtra("PAID","AWD,AER,ALP");
-        i.putExtra("REGISTERED","DXT,KOT,TTX");
-        startActivity(i);
+        asyncTask.execute(url,values);
 
     }
+    @Override
+    public void processFinish(String result){
+        Log.e("received: ",result);
 
+        try{
+            JSONArray arr = new JSONArray(result);
+            Intent i = new Intent(QRCodeScanActivity.this,RegistrationActivity.class);
+            i.putExtra("Result",result);
+            startActivity(i);
+        }catch (JSONException e) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Error!");
+            builder.setMessage(result);
+            builder.setCancelable(false);
+            builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    QRCodeScanActivity.super.onBackPressed();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
+
+    }
 
 }

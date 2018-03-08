@@ -7,12 +7,15 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
@@ -24,11 +27,15 @@ import at.markushi.ui.CircleButton;
  * Created by pavan on 2/27/2018.
  */
 
-public class RegistrationActivity extends AppCompatActivity implements AsyncResponse{
+public class RegistrationActivity extends AppCompatActivity {
 
     HashMap<String,Integer> eventValues;
     int checkValues[]; // 1 - Paid, 2 - Registered, 0 - Default
     GridLayout mainGrid;
+    String paid[];
+    String registered[];
+    int QId;
+    int cost;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events_list);
@@ -36,9 +43,14 @@ public class RegistrationActivity extends AppCompatActivity implements AsyncResp
         setEventValues();
         checkValues = new int[11];
         Bundle bundle = getIntent().getExtras();
-        String paidList = bundle.getString("PAID");
-        String registeredList = bundle.getString("REGISTERED");
-        setCheckValues(paidList,registeredList);
+//        String paidList = bundle.getString("PAID");
+//        String registeredList = bundle.getString("REGISTERED");
+        String result = bundle.getString("Result");
+        parseData(result);
+
+
+
+        setCheckValues();
         calculateBill();
         mainGrid = (GridLayout) findViewById(R.id.mainGrid);
 
@@ -49,7 +61,10 @@ public class RegistrationActivity extends AppCompatActivity implements AsyncResp
         payButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(RegistrationActivity.this,PaymentSuccessfulActivity.class);
+                Intent i = new Intent(RegistrationActivity.this,PaymentConfirmationActivity.class);
+                i.putExtra("checkValues",checkValues);
+                i.putExtra("cost",cost);
+                i.putExtra("QId",QId);
                 startActivity(i);
             }
         });
@@ -68,14 +83,12 @@ public class RegistrationActivity extends AppCompatActivity implements AsyncResp
         eventValues.put("AWD",9);
         eventValues.put("DXT",10);
     }
-    private void setCheckValues(String paid, String registered){
-        String paidArr[] = paid.split(",");
-        String registeredArr[] = registered.split(",");
-
-        for(String str : paidArr)
+    private void setCheckValues(){
+        for(String str : paid)
             checkValues[eventValues.get(str)]=1;
-        for(String str : registeredArr)
-            checkValues[eventValues.get(str)]=2;
+        for(String str : registered)
+            if(checkValues[eventValues.get(str)]==0)
+                checkValues[eventValues.get(str)]=2;
     }
 
     private void setBehaviours(GridLayout mainGrid){
@@ -128,27 +141,59 @@ public class RegistrationActivity extends AppCompatActivity implements AsyncResp
 
         TextView totalBill = (TextView) findViewById(R.id.total_bill);
         if(count==0)
-            totalBill.setText("Bill : Rs. 0");
-        else if(count<3)
+            cost = 0;
+        else if(count<=3)
         {
-            String bill = String.valueOf(count*40);
-            totalBill.setText("Bill : Rs. "+bill);
+            cost = count*30;
         }
-        else if(count==3)
+        else if(count==4)
         {
-            totalBill.setText("Bill : Rs. 100");
+            cost = 100;
         }
-        else if(count == 4)
+        else if(count < 7)
         {
-            totalBill.setText("Bill : Rs. 160");
+            cost = count*30;
         }
         else
         {
-            totalBill.setText("Bill : Rs. 200");
+            cost = 200;
         }
+        totalBill.setText("Bill : Rs. "+String.valueOf(cost));
     }
-    @Override
-    public void processFinish(JSONObject result){
+
+    private void parseData(String result){
+
+        try{
+            JSONArray arr = new JSONArray(result);
+            JSONObject obj = arr.getJSONObject(0).getJSONObject("fields");
+            String paid = obj.getString("paid");
+            String registered = obj.getString("registered");
+            Log.e("PAID : ",paid+"\nREGISTERED: "+registered+"\nPAID LENGTH:"+paid.length());
+            String paidArr[] = paid.split(",");
+            Log.e("PAID ARR: ","");
+            for(int i=0;i<paidArr.length;i++){
+                paidArr[i]=paidArr[i].trim();
+                paidArr[i]=paidArr[i].replace("[","");
+                paidArr[i]=paidArr[i].replace("]","");
+                paidArr[i]=paidArr[i].replace("\"","");
+            }
+            String registeredArr[] = registered.split(",");
+            for(int i=0;i<registeredArr.length;i++){
+                registeredArr[i]=registeredArr[i].trim();
+                registeredArr[i]=registeredArr[i].replace("[","");
+                registeredArr[i]=registeredArr[i].replace("]","");
+                registeredArr[i]=registeredArr[i].replace("\"","");
+            }
+            this.paid = paidArr;
+            this.registered = registeredArr;
+
+            this.QId = obj.getInt("QId");
+//            Toast.makeText(this,"QId : "+QId,Toast.LENGTH_LONG).show();
+//            for(int i=0;i<paidArr.length;i++)
+//                Log.e(""+String.valueOf(i),paidArr[i]);
+        }catch (JSONException e){
+
+        }
 
     }
     @Override
@@ -163,6 +208,7 @@ public class RegistrationActivity extends AppCompatActivity implements AsyncResp
                         // String name = _listDataHeader.get(gPosition);
                         //_listDataHeader.set(gPosition,"Submitted");
                         RegistrationActivity.super.onBackPressed();
+
                     }
                 });
         builder.setNegativeButton("No",
