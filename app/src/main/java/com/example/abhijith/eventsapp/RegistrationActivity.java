@@ -85,10 +85,12 @@ public class RegistrationActivity extends AppCompatActivity {
     }
     private void setCheckValues(){
         for(String str : paid)
-            checkValues[eventValues.get(str)]=1;
+            if(eventValues.get(str)!=null)
+                checkValues[eventValues.get(str)]=1;
         for(String str : registered)
-            if(checkValues[eventValues.get(str)]==0)
-                checkValues[eventValues.get(str)]=2;
+            if(eventValues.get(str)!=null)
+                if(checkValues[eventValues.get(str)]==0)
+                    checkValues[eventValues.get(str)]=2;
     }
 
     private void setBehaviours(GridLayout mainGrid){

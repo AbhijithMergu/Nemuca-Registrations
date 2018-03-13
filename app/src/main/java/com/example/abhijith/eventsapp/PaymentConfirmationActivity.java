@@ -1,6 +1,8 @@
 package com.example.abhijith.eventsapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -22,7 +24,7 @@ public class PaymentConfirmationActivity extends AppCompatActivity implements As
     List<String> eventsList;
     HashMap<Integer,String> eventValues;
     int QId;
-    SendPostRequest asyncTask =new SendPostRequest(PaymentConfirmationActivity.this);
+    SendPostRequest asyncTask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,7 +33,7 @@ public class PaymentConfirmationActivity extends AppCompatActivity implements As
         eventList.setDivider(null);
         populateEventValues();
         populateEventsList();
-        asyncTask.delegate = this;
+
         Bundle bundle = getIntent().getExtras();
         final int[] checkValues = bundle.getIntArray("checkValues");
         int cost = bundle.getInt("cost");
@@ -83,6 +85,8 @@ public class PaymentConfirmationActivity extends AppCompatActivity implements As
                 }catch (JSONException e){
 
                 }
+                asyncTask =new SendPostRequest(PaymentConfirmationActivity.this);
+                asyncTask.delegate = PaymentConfirmationActivity.this;
                 asyncTask.execute(url,values);
             }
         });
@@ -146,6 +150,22 @@ public class PaymentConfirmationActivity extends AppCompatActivity implements As
         {
             Intent i = new Intent(PaymentConfirmationActivity.this,PaymentSuccessfulActivity.class);
             startActivity(i);
+        }
+        else
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Error!");
+            builder.setMessage(result);
+            builder.setCancelable(false);
+
+            builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
         }
     }
 

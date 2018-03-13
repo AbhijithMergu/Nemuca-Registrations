@@ -19,11 +19,11 @@ import at.markushi.ui.CircleButton;
 
 public class MainActivity extends AppCompatActivity implements AsyncResponse {
 
-    SendPostRequest asyncTask =new SendPostRequest(MainActivity.this);
+    SendPostRequest asyncTask;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        asyncTask.delegate = this;
+
         Button b = (Button) findViewById(R.id.scan_button);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,7 +52,8 @@ public class MainActivity extends AppCompatActivity implements AsyncResponse {
 
                 }
 
-
+                asyncTask =new SendPostRequest(MainActivity.this);
+                asyncTask.delegate = MainActivity.this;
                 asyncTask.execute(url,values);
 //                i.putExtra("PAID","AWD,AER,ALP");
 //                i.putExtra("REGISTERED","DXT,KOT,TTX");
