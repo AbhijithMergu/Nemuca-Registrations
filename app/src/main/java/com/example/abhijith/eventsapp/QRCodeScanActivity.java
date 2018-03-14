@@ -34,7 +34,7 @@ import static android.Manifest.permission.CAMERA;
 public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler,AsyncResponse{
     private ZXingScannerView mScannerView;
     private static final int REQUEST_CAMERA = 1;
-    SendPostRequest asyncTask =new SendPostRequest(QRCodeScanActivity.this);
+    SendPostRequest asyncTask;// =new SendPostRequest(QRCodeScanActivity.this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +51,6 @@ public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScann
                 requestPermission();
             }
         }
-        asyncTask.delegate = this;
     }
 
     private boolean checkPermission() {
@@ -166,7 +165,8 @@ public class QRCodeScanActivity extends AppCompatActivity  implements ZXingScann
 
         }
 
-
+        asyncTask =new SendPostRequest(QRCodeScanActivity.this);
+        asyncTask.delegate = this;
         asyncTask.execute(url,values);
 
     }

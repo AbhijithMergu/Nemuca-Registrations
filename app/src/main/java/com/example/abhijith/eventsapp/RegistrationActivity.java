@@ -154,7 +154,7 @@ public class RegistrationActivity extends AppCompatActivity {
         }
         else if(count < 7)
         {
-            cost = count*30;
+            cost = 100+ (count-4)*30;
         }
         else
         {
@@ -223,6 +223,4 @@ public class RegistrationActivity extends AppCompatActivity {
         alertDialog.show();
         // super.onBackPressed();
     }
-
-
 }

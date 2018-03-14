@@ -168,5 +168,4 @@ public class PaymentConfirmationActivity extends AppCompatActivity implements As
             alertDialog.show();
         }
     }
-
 }
